@@ -1,0 +1,13 @@
+net: "./train.prototxt"
+test_interval: 77
+test_iter: 100
+display: 10
+max_iter: 380
+snapshot: 250
+snapshot_prefix: "./weights/"
+
+lr_policy: "fixed"
+base_lr: 0.00005
+momentum: 0.9
+
+solver_mode: CPU

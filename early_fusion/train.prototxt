@@ -1,0 +1,378 @@
+#
+######
+### INPUT LAYER ######
+
+######
+#TRAIN INPUT LAYER
+#
+
+layer{
+	name: "data" 
+	type: "ImageData"
+	top: "data"
+	top: "label"
+	image_data_param {
+		source: "../train.txt"  #link to all input images
+		new_height: 64  #resize to fit into network
+		new_width: 64   #resize
+		batch_size: 5
+		shuffle: true
+}
+	include{
+		phase: TRAIN
+	}
+}
+
+######
+### TEST INPUT LAYER
+#
+
+layer {
+	name: "data"
+	type: "ImageData"
+	top: "data"
+	top: "label"
+	image_data_param {
+		source: "../test.txt"
+		new_height: 64
+		new_width: 64
+		batch_size: 5  #testing 100% of images 32*4 -> test_iter
+		shuffle: true	
+}
+	include {
+		phase: TEST
+	}
+}
+###################################################3
+
+######
+### CONVOLUTIONAL LAYER
+#
+
+layer{
+	name: "concat"
+	bottom: "data"
+	top: "out"
+	type: "Concat"
+	concat_param{
+
+		axis: 0
+	}
+}
+
+
+layer{
+	name: "conv1"
+	type: "Convolution"
+	bottom: "out"
+	top: "conv1"	
+	param {
+		lr_mult:1  #weights
+	}
+	param {
+		lr_mult:2  #biases
+	}
+	convolution_param { #convolutional layer parameters
+		num_output: 64 #number of filters
+		pad: 1 #padding on each side of the image
+		kernel_size: 3 #3x3 kernel
+		stride: 2
+		weight_filler {
+			type: "xavier" #method of initalizing weights
+		}
+		bias_filler {
+			type: "constant" #method of filling biases
+			value: 0 #initialze the biases to 0
+		}
+	}
+}
+######################################################
+
+######
+### RELU LAYER
+#
+
+layer {
+	name: "relu1"
+	type: "ReLU"
+	bottom: "conv1"
+	top: "conv1"
+}
+
+
+#######################################################
+
+
+######
+### POOLING LAYER
+#
+
+layer {
+	name:"pool1"
+	type: "Pooling"
+	bottom: "conv1"  ### recheck????????????
+	top: "pool1"
+	pooling_param {	
+		pool: MAX   #try average and stochastic pooling
+		kernel_size: 2 #2x2 kernel
+		stride: 2 #dimensions cut in half after this layer
+	}
+}
+#########################################################
+###################################################3
+
+######
+### CONVOLUTIONAL LAYER
+#
+
+layer{
+	name: "conv2"
+	type: "Convolution"
+	bottom: "pool1"
+	top: "conv2"
+	param {
+		lr_mult:1  #weights
+	}
+	param {
+		lr_mult:2  #biases
+	}
+	convolution_param { #convolutional layer parameters
+		num_output: 128 #number of filters
+		pad: 1 #padding on each side of the image
+		kernel_size: 3 #3x3 kernel
+		stride: 2	
+		weight_filler {
+			type: "xavier" #method of initalizing weights
+		}
+		bias_filler {
+			type: "constant" #method of filling biases
+			value: 0 #initialze the biases to 0
+		}
+	}
+}
+######################################################
+
+######
+### RELU LAYER
+#
+
+layer {
+
+	name: "relu2"
+	type: "ReLU"
+	bottom: "conv2"
+	top: "conv2"
+}
+
+#######################################################
+
+
+######
+### POOLING LAYER
+#
+
+
+layer {
+	name:"pool2"
+	type: "Pooling"
+	bottom: "conv2"  ### recheck????????????
+	top: "pool2"
+	pooling_param {	
+		pool: MAX   #try average and stochastic pooling
+		kernel_size: 2 #2x2 kernel
+		stride: 2 #dimensions cut in half after this layer
+	}
+}
+
+
+######################################################
+#######################################################
+### CONVOLUTIONAL LAYER
+#
+
+
+layer{
+	name: "conv3"
+	type: "Convolution"
+	bottom: "pool2"
+	top: "conv3"	
+	param {
+		lr_mult:1  #weights
+	}
+	param {
+		lr_mult:2  #biases
+	}
+	convolution_param { #convolutional layer parameters
+		num_output: 256 #number of filters
+		pad: 1 #padding on each side of the image
+		kernel_size: 3 #3x3 kernel
+		stride: 2
+		weight_filler {
+			type: "xavier" #method of initalizing weights
+		}
+		bias_filler {
+			type: "constant" #method of filling biases
+			value: 0 #initialze the biases to 0
+		}
+	}
+}
+######################################################
+
+######
+### RELU LAYER
+#
+
+layer {
+	name: "relu3"
+	type: "ReLU"
+	bottom: "conv3"
+	top: "conv3"
+}
+
+
+#######################################################
+
+
+######
+### POOLING LAYER
+#
+
+
+layer {
+	name:"pool3"
+	type: "Pooling"
+	bottom: "conv3"  ### recheck????????????
+	top: "pool3"
+	pooling_param {	
+		pool: MAX   #try average and stochastic pooling
+		kernel_size: 2 #2x2 kernel
+		stride: 2 #dimensions cut in half after this layer
+	}
+}
+
+
+#########################################################
+
+######
+### FULLY CONNECTED LAYER
+
+
+#########################################################
+
+######
+### FULLY CONNECTED LAYER
+#
+
+layer{
+	name:"fc2"
+	type: "InnerProduct"
+	bottom: "pool3"
+	top: "fc2"
+	param {
+		lr_mult: 1
+	}
+	param {
+		lr_mult:2
+	}
+	inner_product_param{
+		num_output: 1024  #number of nodes
+		weight_filler {
+			type:"xavier"
+		}
+		bias_filler {
+			type:"constant" ### value??????????
+		}
+	}
+}
+
+#########################################################
+######################################################
+
+######
+### RELU LAYER
+#
+
+layer {
+	name: "relu4"
+	type: "ReLU"
+	bottom: "fc2"
+	top: "fc2"
+}
+
+#######################################################
+#########################################################
+
+######
+### FULLY CONNECTED LAYER
+#
+
+layer{
+	name:"fc3"
+	type: "InnerProduct"
+	bottom: "fc2"
+	top: "fc3"
+	param {
+		lr_mult: 1
+	}
+	param {
+		lr_mult:2
+	}
+	inner_product_param{
+		num_output: 6  #number of nodes
+		weight_filler {
+			type:"xavier"
+		}
+		bias_filler {
+			type:"constant" 
+		}
+	}
+}
+
+#########################################################
+##########################################################
+
+
+######
+### SOFTMAX LAYER
+#
+
+layer {
+	name: "loss"
+	type: "SoftmaxWithLoss"
+	bottom: "fc3"
+	bottom: "label"
+	top: "loss"
+	include {
+		phase: TRAIN
+	}
+}
+
+### Softmax without loss for testing
+
+layer {
+	bottom: "fc3" 
+	top: "prob"
+	name: "prob"
+	type: "Softmax"
+	include {
+		phase: TEST
+	}
+}
+
+##########################################################
+
+
+######
+### ACCURACY LAYER
+#
+
+layer {
+	name: "accuracy"
+	type: "Accuracy"
+	bottom: "prob"
+	bottom: "label"
+	top: "accuracy/top-1"
+	include {
+		phase: TEST
+	}
+}
